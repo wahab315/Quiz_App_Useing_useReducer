@@ -6,6 +6,7 @@ import StartScreen from "./components/StartScreen";
 import Question from "./components/Question";
 import NextButton from "./components/NextButton";
 import Progress from "./components/Progress";
+import FinishedQuiz from "./components/FinishedQuiz";
 
 const initialState = {
   questions: [],
@@ -53,12 +54,13 @@ function reducer(state, action) {
         index: state.index + 1,
         answer: undefined,
       };
-    // previous button to move on previous question
-    case "previousQuestion":
+    // Finished
+    case "finish":
       return {
         ...state,
-        index: state.index - 1,
+        status: "finished",
       };
+    // final State
 
     default:
       throw new Error("Error ( No Action Find )");
@@ -108,8 +110,21 @@ function App() {
                 dispatch={dispatch}
                 answer={answer}
               />
-              <NextButton dispatch={dispatch} answer={answer} />
+              <NextButton
+                dispatch={dispatch}
+                answer={answer}
+                index={index}
+                numQuestion={questions.length}
+              />
             </>
+          )}
+
+          {status === "finished" && (
+            <FinishedQuiz
+              points={points}
+              maxPossiblePoints={maxPoints}
+              dispatch={dispatch}
+            />
           )}
         </Main>
       </div>
