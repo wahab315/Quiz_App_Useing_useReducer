@@ -13,6 +13,7 @@ const initialState = {
   status: "loading",
   index: 0,
   points: 0,
+  highScore: 0,
 };
 
 function reducer(state, action) {
@@ -24,18 +25,21 @@ function reducer(state, action) {
         questions: action.payload,
         status: "ready",
       };
+
     // Data Failed Check
     case "dataFailed":
       return {
         ...state,
         status: "error",
       };
+
     // Start Quiz
     case "start":
       return {
         ...state,
         status: "active",
       };
+
     // answer
     case "newAnswer":
       const question = state.questions.at(state.index);
@@ -47,6 +51,7 @@ function reducer(state, action) {
             ? state.points + question.points
             : state.points,
       };
+
     // next button to move on next question
     case "nextQuestion":
       return {
@@ -54,23 +59,31 @@ function reducer(state, action) {
         index: state.index + 1,
         answer: undefined,
       };
+
     // Finished
     case "finish":
       return {
         ...state,
         status: "finished",
+        highScore:
+          state.points > state.highScore ? state.points : state.highScore,
       };
-    // final State
+
+    // restart Quiz
+    case "restart":
+      return {
+        ...state,
+        questions: state.questions,
+        status: "ready",
+      };
 
     default:
       throw new Error("Error ( No Action Find )");
   }
 }
 function App() {
-  const [{ questions, status, index, answer, points }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const [{ questions, status, index, answer, points, highScore }, dispatch] =
+    useReducer(reducer, initialState);
   useEffect(function () {
     fetch("http://localhost:4000/questions")
       .then((res) => res.json())
@@ -84,9 +97,6 @@ function App() {
     <>
       <div className="app">
         <Header />
-
-        {/* <h5>{points > 0 ? points : ""}</h5> */}
-
         <Main>
           {status === "loading" && <Loader />}
           {status === "error" && <Error />}
@@ -124,6 +134,7 @@ function App() {
               points={points}
               maxPossiblePoints={maxPoints}
               dispatch={dispatch}
+              highScore={highScore}
             />
           )}
         </Main>
